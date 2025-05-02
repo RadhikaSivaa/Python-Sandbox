@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Python Sandbox</title>
+  <script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/skulpt.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/skulpt-stdlib.js"></script>
+  <style>
+    body { font-family: sans-serif; display: flex; height: 100vh; margin: 0; }
+    .sidebar { width: 200px; background: #f0f0f0; padding: 10px; overflow-y: auto; }
+    .editor { flex: 1; padding: 10px; }
+    textarea { width: 100%; height: 300px; font-family: monospace; }
+    button { padding: 10px 20px; margin-top: 10px; }
+    pre { background: #eee; padding: 10px; min-height: 100px; }
+  </style>
+</head>
+<body>
+  <div class="sidebar">
+    <h3>Code Files</h3>
+    <ul id="fileList">
+      <li onclick="loadFile('variables')">variables.py</li>
+      <li onclick="loadFile('loops')">loops.py</li>
+      <!-- Add more files here -->
+    </ul>
+  </div>
+
+  <div class="editor">
+    <h2>Python Sandbox</h2>
+    <textarea id="codeArea">print("Hello from Skulpt!")</textarea><br>
+    <button onclick="runCode()">Run Code</button>
+    <h3>Output:</h3>
+    <pre id="output"></pre>
+  </div>
+
+  <script>
+    const fileContents = {
+      variables: 'name = "Alice"\nage = 25\nprint(name, "is", age, "years old.")',
+      loops: 'for i in range(5):\n    print(i)'
+    };
+
+    function loadFile(fileName) {
+      document.getElementById("codeArea").value = fileContents[fileName];
+    }
+
+    function outf(text) {
+      document.getElementById("output").innerHTML += text + '\n';
+    }
+
+    function runCode() {
+      let prog = document.getElementById("codeArea").value;
+      document.getElementById("output").innerHTML = '';
+      Sk.configure({ output: outf, read: builtinRead });
+      Sk.misceval.asyncToPromise(() => Sk.importMainWithBody("<stdin>", false, prog));
+    }
+
+    function builtinRead(x) {
+      if (Sk.builtinFiles === undefined || Sk.builtinFiles["files"][x] === undefined)
+        throw "File not found: '" + x + "'";
+      return Sk.builtinFiles["files"][x];
+    }
+  </script>
+</body>
+</html>
